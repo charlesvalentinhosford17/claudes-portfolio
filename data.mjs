@@ -11,10 +11,17 @@ export function normalizeData(raw){
  const watchlist=rows('watchlist').map(p=>({name:prop(p,'Company')||'Unnamed company',ticker:prop(p,'Ticker'),status:prop(p,'Research status')||'Unreviewed',priority:prop(p,'Priority'),reason:prop(p,'Why on watch'),change:prop(p,'Recent change'),reviewed:date(prop(p,'Last reviewed')),evidence:date(prop(p,'Evidence date')),source:prop(p,'Primary source'),url:p.url})).sort((a,b)=>(b.reviewed||'').localeCompare(a.reviewed||''));
  const activity=rows('activity').map(p=>({event:prop(p,'Event')||'Activity',date:date(prop(p,'Date')),category:prop(p,'Category'),status:prop(p,'Status'),details:prop(p,'Details'),ticker:prop(p,'Ticker'),source:prop(p,'Source'),url:p.url})).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
  const history=rows('history').map(p=>({name:prop(p,'Snapshot'),date:date(prop(p,'As of')),nav:finite(prop(p,'Total NAV EUR')),cash:finite(prop(p,'Paper cash EUR')),positions:finite(prop(p,'Positions EUR')),realized:finite(prop(p,'Realized P&L EUR')),unrealized:finite(prop(p,'Unrealized P&L EUR')),funding:finite(prop(p,'Net funding EUR')),benchmark:finite(prop(p,'Benchmark value EUR')),notes:prop(p,'Notes')})).filter(x=>x.date).sort((a,b)=>a.date.localeCompare(b.date));
- const latest=[...history].reverse().find(x=>x.nav!==null)||null;
+ // A recorded number alone is not a reconciled paper NAV. Hide incomplete / inconsistent values.
+ const checkedHistory=history.map(x=>{
+   const valid = x.nav!==null && x.cash!==null && x.positions!==null &&
+     x.nav>=0 && x.cash>=0 && x.positions>=0 &&
+     Math.abs(x.nav-(x.cash+x.positions))<=0.02;
+   return {...x,nav:valid?x.nav:null,integrity:valid?'arithmetically_reconciled':'missing_or_inconsistent'};
+ });
+ const latest=[...checkedHistory].reverse().find(x=>x.nav!==null)||null;
  const trades=activity.filter(x=>x.category==='Paper trade'&&x.status==='Completed');
  const reports=rows('reports').map(p=>({name:prop(p,'Report')||'Daily report',date:date(prop(p,'Report date')),summary:prop(p,'Summary'),status:prop(p,'Status')||'Incomplete',pdf:prop(p,'PDF')||[],nav:finite(prop(p,'Paper NAV EUR')),trades:finite(prop(p,'Trades recorded')),reviewed:finite(prop(p,'Reviewed companies')),url:p.url})).filter(x=>x.date).sort((a,b)=>b.date.localeCompare(a.date));
- return {holdings,watchlist,activity,history,trades,reports,latest,meta:{paperOnly:true,holdingsDate:holdings.map(x=>x.asOf).filter(Boolean).sort().at(-1)??null,watchDate:watchlist.map(x=>x.reviewed).filter(Boolean).sort().at(-1)??null,navDate:latest?.date??null}};
+ return {holdings,watchlist,activity,history:checkedHistory,trades,reports,latest,meta:{paperOnly:true,invalidNavSnapshots:checkedHistory.filter(x=>x.integrity!=='arithmetically_reconciled').length,holdingsDate:holdings.map(x=>x.asOf).filter(Boolean).sort().at(-1)??null,watchDate:watchlist.map(x=>x.reviewed).filter(Boolean).sort().at(-1)??null,navDate:latest?.date??null}};
 }
 export async function getNotionRecords(token,fetcher=fetch){
  if(!token)throw new Error('Notion integration is not configured');
