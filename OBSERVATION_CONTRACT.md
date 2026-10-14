@@ -23,6 +23,6 @@ The viewer and scheduled daily PDFs observe **ChatGPT's Portfolio only**. No sou
 
 ## Report delivery
 
-At approximately 20:00 Europe/Paris daily, a separate ChatGPT task is scheduled to generate a concise one-page PDF covering the project's actual recorded activity that day, preserve it in the private ChatGPT Library and attempt to attach it to the Daily Reports Notion archive. It may report no changes rather than fabricate work. The dashboard displays attachments from Notion if available and never invents a PDF link.
+At 19:00 Europe/Paris daily, a separate ChatGPT task is scheduled to generate a concise one-page PDF covering the project's actual recorded activity that day, preserve it in the private ChatGPT Library and attempt to attach it to the Daily Reports Notion archive. It may report no changes rather than fabricate work. The dashboard displays attachments from Notion if available and never invents a PDF link.
 
 Do not redesign the portfolio mechanism to accommodate this viewer; adapt the observation interface to the actual mechanism's verified output.
