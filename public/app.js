@@ -26,6 +26,10 @@ function renderChart(history){
 function render(){
  if(!data)return;
  const h=data.holdings||[],w=data.watchlist||[],a=data.activity||[],t=data.trades||[],hist=data.history||[],r=data.reports||[],latest=data.latest;
+ const lastResearch=a.find(x=>(x.category==='Research'||x.category==='Watchlist')&&x.status==='Completed');
+ by('researchState').textContent=lastResearch?'Last recorded '+date(lastResearch.date):'No review recorded';
+ by('executionState').textContent=t.length?t.length+' recorded · latest '+date(t[0].date):'No paper fills yet';
+ by('reportState').textContent=r.length?date(r[0].date)+' · '+(r[0].pdf?.length?'PDF attached':'Library delivery'):'No report indexed';
  by('navValue').textContent=euro(latest?.nav);by('navDate').textContent=latest?.date?'NAV as of '+date(latest.date):'No recorded NAV';
  by('investedValue').textContent=euro(latest?.positions);by('holdingCount').textContent=String(h.length);by('watchCount').textContent=String(w.length);
  by('holdingAsOf').textContent=data.meta?.holdingsDate?'Latest holding: '+date(data.meta.holdingsDate):'No dated holdings';
