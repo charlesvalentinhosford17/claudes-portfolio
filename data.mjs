@@ -1,7 +1,7 @@
 const IDS=Object.freeze({holdings:'04792c14-6a6d-46fd-9157-19d5dfd76e67',watchlist:'bde219e6-2cac-45f2-a824-ea222a4c0bc8',activity:'3b4de5e5-2ce0-430d-bb7d-c12db4d10aac',history:'81b3bf2a-8ff1-4f45-8df9-567f770ed6dc',reports:'960094d4-1c87-4d41-9551-ababc1879698'});
 export const SOURCES=IDS;
 const plain=(v)=>Array.isArray(v)?v.map(x=>x.plain_text??x.text?.content??'').join(''):'';
-const val=(p)=>{if(!p)return null;switch(p.type){case'title':case'rich_text':return plain(p[p.type]);case'select':return p.select?.name??null;case'number':return Number.isFinite(p.number)?p.number:null;case'date':return p.date?.start??null;case'url':return p.url??null;case'files':case'file':return (p.files??p.file??[]).map(f=>({name:f.name??'PDF report',url:f.file?.url??f.external?.url??null,expires:f.file?.expiry_time??null}));default:return null}};
+const val=(p)=>{if(!p)return null;switch(p.type){case'title':case'rich_text':return plain(p[p.type]);case'select':return p.select?.name??null;case'number':return Number.isFinite(p.number)?p.number:null;case'date':return p.date?.start??null;case'url':return p.url??null;case'files':case'file':return (Array.isArray(p.files)?p.files:Array.isArray(p.file)?p.file:[]).map(f=>({name:f.name??'PDF report',url:f.file?.url??f.external?.url??null,expires:f.file?.expiry_time??null}));default:return null}};
 const prop=(page,key)=>val(page.properties?.[key]);
 const date=(v)=>typeof v==='string'?v.slice(0,10):null;
 const finite=(n)=>typeof n==='number'&&Number.isFinite(n)?n:null;
