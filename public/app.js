@@ -2,7 +2,7 @@
 'use strict';
 const by=id=>document.getElementById(id);
 let data=null,active='overview';
-const views={overview:['OVERVIEW','Portfolio overview','Your independent portfolio, decisions and research — in one place.'],holdings:['PORTFOLIO','Portfolio holdings','Recorded paper positions and valuations.'],trades:['PAPER TRADES','Transaction history','An auditable view of completed simulated trades.'],watchlist:['WATCHLIST','Research watchlist','Companies being followed by ChatGPT’s Portfolio.'],activity:['ACTIVITY','Activity timeline','What the independent research process has actually recorded.']};
+const views={overview:['OVERVIEW','Portfolio overview','Your independent portfolio, decisions and research — in one place.'],holdings:['PORTFOLIO','Portfolio holdings','Recorded paper positions and valuations.'],trades:['PAPER TRADES','Transaction history','An auditable view of completed simulated trades.'],watchlist:['WATCHLIST','Research watchlist','Companies being followed by ChatGPT’s Portfolio.'],activity:['ACTIVITY','Activity timeline','What the independent research process has actually recorded.'],reports:['DAILY REPORTS','Daily PDF reports','One-page, dated summaries of the verified paper-portfolio work.']};
 const euro=n=>typeof n==='number'&&Number.isFinite(n)?new Intl.NumberFormat('en-IE',{style:'currency',currency:'EUR'}).format(n):'—';
 const text=x=>x===null||x===undefined||x===''?'—':String(x);
 const date=x=>x?new Date(x+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}):'Not recorded';
@@ -25,11 +25,11 @@ function renderChart(history){
 }
 function render(){
  if(!data)return;
- const h=data.holdings||[],w=data.watchlist||[],a=data.activity||[],t=data.trades||[],hist=data.history||[],latest=data.latest;
+ const h=data.holdings||[],w=data.watchlist||[],a=data.activity||[],t=data.trades||[],hist=data.history||[],r=data.reports||[],latest=data.latest;
  by('navValue').textContent=euro(latest?.nav);by('navDate').textContent=latest?.date?'NAV as of '+date(latest.date):'No recorded NAV';
  by('investedValue').textContent=euro(latest?.positions);by('holdingCount').textContent=String(h.length);by('watchCount').textContent=String(w.length);
  by('holdingAsOf').textContent=data.meta?.holdingsDate?'Latest holding: '+date(data.meta.holdingsDate):'No dated holdings';
- by('tradesCount').textContent=t.length+' recorded';by('activityCount').textContent=a.length+' events';
+ by('tradesCount').textContent=t.length+' recorded';by('activityCount').textContent=a.length+' events';by('reportCount').textContent=r.length+' reports';
  by('chartDate').textContent=latest?.date?'Last NAV: '+date(latest.date):'Awaiting performance history';
  renderChart(hist);
  by('holdingsTable').innerHTML=h.length?table(['Holding','Units','Value (EUR)','Weight','As of','Thesis'],h.map(x=>['<strong>'+esc(x.name)+'</strong><small>'+esc(x.ticker||'')+'</small>',esc(text(x.units)),esc(euro(x.value)),x.weight===null?'—':esc(x.weight)+'%',esc(date(x.asOf)),esc(text(x.thesis))])):empty('No paper holdings yet','The investing process has not recorded any simulated positions in this independent portfolio.');
@@ -38,6 +38,14 @@ function render(){
  const display=filter==='all'?w:w.filter(x=>x.status===filter);
  by('watchTable').innerHTML=display.length?table(['Company','Research status','Why it is watched','Latest evidence','Reviewed'],display.map(x=>['<strong>'+esc(x.name)+'</strong><small>'+esc(x.ticker||'')+'</small>',pill(x.status),esc(text(x.reason)),esc(text(x.change))+'<small>'+link(x.source)+'</small>',esc(date(x.reviewed))])):empty(w.length?'No matches for this filter':'No companies on watch yet',w.length?'Choose another research status to see other candidates.':'The independent research process has not populated its watchlist yet.');
  by('activityTable').innerHTML=a.length?table(['Date','Event','Category','Details'],a.map(x=>[esc(date(x.date)),'<strong>'+esc(x.event)+'</strong><small>'+link(x.source)+'</small>',pill(x.category),esc(text(x.details))])):empty('No recorded activity','Verified research and portfolio updates will appear here when written to the independent database.');
+ by('reportsTable').innerHTML=r.length?table(['Date','Report summary','Status','PDF'],r.map(x=>[
+   esc(date(x.date)),
+   '<strong>'+esc(x.name)+'</strong><small>'+esc(text(x.summary))+'</small>',
+   pill(x.status),
+   x.pdf.some(f=>typeof f.url==='string'&&f.url.startsWith('https://'))
+     ?link(x.pdf.find(f=>typeof f.url==='string'&&f.url.startsWith('https://')).url,'Open PDF')
+     :'<span class="tiny">PDF not attached</span><small>'+link(x.url,'Report record')+'</small>'
+ ])):empty('No daily reports archived','The daily one-page PDF is delivered through the scheduled ChatGPT task. This archive shows reports stored in the dedicated Notion database; an unattached file will be marked clearly.');
  by('lastFetch').textContent=data.fetchedAt?'Fetched '+new Date(data.fetchedAt).toLocaleString('en-GB'):'Not synchronized';
 }
 async function load(){
