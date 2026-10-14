@@ -53,7 +53,7 @@ The main NAV and P&L are shown only where the separate performance-history datab
 
 ## Daily one-page PDFs
 
-A **separate scheduled ChatGPT task** is configured for approximately 20:00 Europe/Paris each day, starting 15 October 2026. It reads only this project's five Notion databases, creates a dated one-page report, and delivers the PDF via ChatGPT. The report states the day’s actual paper holdings, executed paper trades (if any), research changes, evidence dates and outstanding work; it never invents fills, performance or starting capital.
+A **separate scheduled ChatGPT task** is configured for 19:00 Europe/Paris each day, starting 15 October 2026. It reads only this project's five Notion databases, creates a dated one-page report, and delivers the PDF via ChatGPT. This 19:00 report is an evening snapshot, not a final US-market close. The report states the day’s actual paper holdings, executed paper trades (if any), research changes, evidence dates and outstanding work; it never invents fills, performance or starting capital.
 
 PDFs are also saved privately in the user's ChatGPT Library under `/ChatGPTs Portfolio/Daily Reports`. Each report is indexed in this project's **Daily Reports** Notion database. **Notion PDF attachment is a separate step**: if unavailable, the Notion record remains marked Incomplete, and the dashboard shows the report metadata with “PDF not attached” instead of a broken or invented file link. A PDF appears as clickable in the website only after a completed secure Notion upload. The app does not generate the PDF itself.
 
