@@ -24,3 +24,22 @@ test('attached PDFs are visible only when the Notion files property actually exi
  const d=normalizeData({reports:[{properties:{Report:{type:'title',title:[{plain_text:'Daily report'}]},'Report date':{type:'date',date:{start:'2026-10-15'}},PDF:{type:'files',files:[{name:'2026-10-15.pdf',type:'file',file:{url:'https://example.com/signed-pdf',expiry_time:'2026-10-15T20:00:00Z'}}]}},url:'https://notion.so/report'}]});
  assert.equal(d.reports[0].pdf.length,1);assert.equal(d.reports[0].pdf[0].url,'https://example.com/signed-pdf');
 });
+
+test('paper NAV remains unavailable if cash and positions do not reconcile',()=>{
+ const d=normalizeData({history:[
+   row({'Snapshot':['title','Incorrect'],'As of':['date','2026-10-14'],'Paper cash EUR':['number',900],'Positions EUR':['number',60],'Total NAV EUR':['number',1000]})
+ ]});
+ assert.equal(d.latest,null);assert.equal(d.history[0].nav,null);assert.equal(d.meta.invalidNavSnapshots,1);
+});
+test('arithmetically reconciled paper NAV can be presented with source date',()=>{
+ const d=normalizeData({history:[
+   row({'Snapshot':['title','Baseline'],'As of':['date','2026-10-14'],'Paper cash EUR':['number',900],'Positions EUR':['number',100],'Total NAV EUR':['number',1000]})
+ ]});
+ assert.equal(d.latest.nav,1000);assert.equal(d.latest.date,'2026-10-14');assert.equal(d.meta.invalidNavSnapshots,0);
+});
+test('paper NAV refuses a value with missing source balance',()=>{
+ const d=normalizeData({history:[
+   row({'Snapshot':['title','Incomplete'],'As of':['date','2026-10-14'],'Positions EUR':['number',100],'Total NAV EUR':['number',1000]})
+ ]});
+ assert.equal(d.latest,null);assert.equal(d.meta.invalidNavSnapshots,1);
+});
