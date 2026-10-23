@@ -11,7 +11,9 @@ export function eventToRow(e, decisionsById = {}) {
   const isDT = e.at.length > 10;
   const notes = {
     fund: () => `€${centsToEur(e.amountCents)} virtual capital`,
-    decision: () => `${e.side} ${e.qty} ${inst?.symbol}${e.ceiling ? ` (ceiling ${e.ceiling} ${inst?.currency})` : ''}, fills at the close of ${e.targetSession}. ${e.reason || ''}`,
+    decision: () => e.qtyAtFill
+      ? `BUY as many whole ${inst?.symbol} shares as the book's cash buys at the close of ${e.targetSession}. ${e.reason || ''}`
+      : `${e.side} ${e.qty} ${inst?.symbol}${e.ceiling ? ` (ceiling ${e.ceiling} ${inst?.currency})` : ''}, fills at the close of ${e.targetSession}. ${e.reason || ''}`,
     fill: () => `${e.side} ${e.qty} ${inst?.symbol} at close ${e.close} ${inst?.currency}${e.mirrorOf ? ' (no-selection mirror)' : ''}`,
     expired: () => e.reason, skip: () => e.reason, dividend: () => e.note || 'Dividend', split: () => `Split ratio ${e.ratio}`,
     correction: () => `Reverses ${e.reverses}: ${e.reason}`, pause: () => e.reason || '15% downturn pause', restart: () => `Restart approved by ${e.approvedBy}`
@@ -23,7 +25,7 @@ export function eventToRow(e, decisionsById = {}) {
     'date:Date:start': e.at, 'date:Date:is_datetime': isDT ? 1 : 0,
     ...(inst ? { Ticker: inst.symbol, Currency: inst.currency } : {}),
     ...(e.side ? { Side: e.side === 'BUY' ? 'Buy' : 'Sell' } : {}),
-    ...(e.qty ? { Quantity: e.qty } : {}),
+    ...(e.qty ? { Quantity: e.qtyAtFill ? 'set at the close' : e.qty } : {}),
     ...(e.type === 'fill' ? { Price: e.close } : e.type === 'decision' && e.ceiling ? { Price: e.ceiling } : {}),
     ...(Number.isSafeInteger(e.cashEurCents) ? { 'Cash change EUR': centsToEur(e.cashEurCents) } : {}),
     ...(e.type === 'fund' ? { 'Cash change EUR': centsToEur(e.amountCents) } : {}),
