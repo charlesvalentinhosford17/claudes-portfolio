@@ -50,10 +50,17 @@ export function bookPending({ events, asOf, bars, fx }) {
       const i = d.instrument;
       if (!(i.key in bars)) fail('DATA_MISSING', `no price history supplied for ${i.symbol}; nothing booked`);
       const bar = bars[i.key][d.targetSession];
-      const ticks = qtyToTicks(d.qty);
+      let ticks = qtyToTicks(d.qty);
+      if (d.qtyAtFill && bar) {
+        assert(bookName === 'passive' && i.key === CONFIG.etf.key, 'QTY_AT_FILL_PASSIVE_ONLY', d.id);
+        let n = Math.floor(settledCash(st.books[bookName], d.targetSession) / 100 / bar.close);
+        while (n > 0 && settledCash(st.books[bookName], d.targetSession) + fillAmounts({ side: 'BUY', kind: 'etf', currency: 'EUR', ticks: n * 10000, close: bar.close }).cashEurCents < 0) n--;
+        ticks = n * 10000;
+      }
       const expire = (reason) => add({ id: 'X-' + d.id, type: 'expired', book: bookName, at: d.targetSession, decisionId: d.id, reason });
       if (!bar) { expire('NO_SESSION: no completed session on the target date (holiday, halt or missing data)'); st = replay(all); continue; }
       if (d.side === 'BUY' && bar.close > d.ceiling + 1e-9) { expire(`ABOVE_CEILING: close ${bar.close} > ceiling ${d.ceiling}`); st = replay(all); continue; }
+      if (ticks <= 0) { expire('ZERO_QUANTITY: not enough cash for one share at the close'); st = replay(all); continue; }
       if (!Number.isFinite(bar.volume) || ticks / 10000 > CONFIG.volumeParticipation * bar.volume) { expire(`VOLUME: ${bar.volume ?? 'unknown'} traded`); st = replay(all); continue; }
       const rate = fxFor(fx, i.currency, d.targetSession);
       const extra = {};
@@ -106,13 +113,15 @@ export function launchEvents({ decisionAt, etfClose }) {
     return n;
   };
   const a = maxShares(Math.round(CONFIG.capitalCents * CONFIG.initialEtfFraction));
-  const p = maxShares(CONFIG.capitalCents);
   const ymd = ts.replaceAll('-', '');
+  // The passive benchmark is "€1,000 into the ACWI ETF on day one": its quantity is the most whole shares the
+  // €1,000 buys at the actual close (no decision-making, so no safety margin that would leave it partly in cash).
   const dec = (book, code, n) => ({ id: `D-${ymd}-${code}-${CONFIG.etf.symbol}-B-1`, type: 'decision', book, at: decisionAt, side: 'BUY',
-    instrument: compact(CONFIG.etf), qty: String(n), ceiling, targetSession: ts, startType: 'parking', launch: true,
+    instrument: compact(CONFIG.etf), qty: String(n), ceiling: book === 'passive' ? Math.round(etfClose * 1.10 * 100) / 100 : ceiling,
+    ...(book === 'passive' ? { qtyAtFill: true } : {}), targetSession: ts, startType: 'parking', launch: true,
     reason: book === 'active' ? 'Launch: park 80% in the ACWI ETF (rules v1.1 s.3)' : 'Launch: passive benchmark, all-in ACWI ETF (rules v1.1 s.2)' });
   return [
     ...CONFIG.books.map(b => ({ id: `FUND-${b}`, type: 'fund', book: b, at: fundDate, amountCents: CONFIG.capitalCents })),
-    dec('active', 'A', a), dec('passive', 'P', p)
+    dec('active', 'A', a), dec('passive', 'P', 0)
   ];
 }

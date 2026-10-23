@@ -76,7 +76,7 @@ test('launch: three books funded with €1,000; active parks ~80% and passive ~1
   const d = ev.filter(e => e.type === 'decision');
   assert.equal(ev.filter(e => e.type === 'fund').length, 3);
   assert.equal(d.find(x => x.book === 'active').qty, '7');
-  assert.equal(d.find(x => x.book === 'passive').qty, '9');
+  assert.equal(d.find(x => x.book === 'passive').qtyAtFill, true); // sized at the actual close: fully invested benchmark
   assert.equal(d[0].ceiling, 110.47); assert.equal(d[0].targetSession, '2026-10-26');
   assert.throws(() => run('launch', { events: ev, launch: { decisionAt: '2026-10-26T06:13:00Z', etfClose: 108.3 } }), /ALREADY_LAUNCHED/);
 });

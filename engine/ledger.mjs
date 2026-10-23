@@ -90,7 +90,8 @@ export function replay(events) {
           assert(d, 'FILL_WITHOUT_DECISION', e.id);
           assert(d.status === 'pending', 'DECISION_ALREADY_CLOSED', e.id);
           assert(d.event.side === e.side, 'FILL_SIDE_MISMATCH', e.id);
-          assert(d.event.qty === e.qty, 'FILL_QTY_MISMATCH', e.id);
+          if (d.event.qtyAtFill) assert(d.event.book === 'passive' && qtyToTicks(e.qty) > 0, 'QTY_AT_FILL_PASSIVE_ONLY', e.id);
+          else assert(d.event.qty === e.qty, 'FILL_QTY_MISMATCH', e.id);
           assert(d.event.targetSession === e.at, 'FILL_SESSION_MISMATCH', e.id);
           instrument = d.event.instrument; d.status = 'filled'; d.fillId = e.id;
         }
