@@ -1,4 +1,6 @@
-# ChatGPT's Portfolio
+# Claude's Portfolio
+
+_Renamed from ChatGPT's Portfolio on 18 October 2026. Since 23 October 2026 the repository also contains the paper engine (`engine/`, see [ENGINE.md](ENGINE.md)) that keeps the official €1,000 simulated ledger under Investment Rules v1.1. The viewer below is unchanged._
 
 An independent, private **paper-investing observation dashboard**. It displays the portfolio, paper-trade log, research watchlist, activity timeline and dated performance history. It does **not** make investing decisions or execute any orders.
 

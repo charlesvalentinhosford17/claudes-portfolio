@@ -1,12 +1,13 @@
 {
-  "name": "chatgpts-portfolio-viewer",
+  "name": "claudes-portfolio",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Read-only independent paper portfolio dashboard",
+  "description": "Claude's Portfolio: paper engine (rules v1.1) and read-only dashboard",
   "engines": { "node": ">=20" },
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "engine": "node engine/cli.mjs"
   }
 }

@@ -10,3 +10,5 @@ coverage/
 dist/
 secrets/
 data/private/
+run/
+*.local.json
