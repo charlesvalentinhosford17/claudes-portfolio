@@ -64,7 +64,7 @@ ETF re-parking: `{ "side": "BUY", "instrument": <CONFIG.etf>, "budgetCents": 320
 Sale: `{ "side": "SELL", "instrument": <same instrument>, "qty": "0.4", "reason": "Exit rule 3: catalyst missed (source)" }`.
 
 ## Daily runbook (used by the scheduled tasks)
-1. Clone this repo (branch `claude/paper-engine-v1.1` until merged); `npm test` must pass, else stop and report.
+1. Clone this repo (main branch); `npm test` must pass, else stop and report.
 2. Read the Ledger (all pages) → `events`; Performance History → `navHistory`; Cases.
 3. Prices with the IBKR price tools: for every held instrument, every pending decision and the ACWI ETF, `get_price_history`
    (step ONE_DAY, step_count 10, outside_rth false, no exchange); EUR.USD as above. Save the raw JSON → `ingest`.
