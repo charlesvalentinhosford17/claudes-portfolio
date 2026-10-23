@@ -21,6 +21,7 @@ export function eventToRow(e, decisionsById = {}) {
   // Prefixed so the Notion connector stores it as text (it rejects strings that look like JSON objects).
   const payload = PAYLOAD_PREFIX + JSON.stringify(e);
   assert(payload.length <= 1990, 'PAYLOAD_TOO_LONG', e.id);
+  assert(!payload.includes('\\'), 'PAYLOAD_UNSAFE', `${e.id}: text fields must not contain quotes or backslashes`);
   return {
     'Event ID': e.id, Type: TYPE_LABEL[e.type], ...(e.book ? { Book: BOOK_LABEL[e.book] } : {}),
     'date:Date:start': e.at, 'date:Date:is_datetime': isDT ? 1 : 0,
@@ -38,13 +39,20 @@ export function eventToRow(e, decisionsById = {}) {
 }
 
 export const PAYLOAD_PREFIX = 'ev1:';
-/** Parses one Payload string (with or without the 'ev1:' prefix). */
+/**
+ * Parses one Payload string (with or without the 'ev1:' prefix). Notion's export escapes markdown punctuation
+ * (e.g. '\{'); payloads never contain backslashes (enforced when rows are built), so undoing '\X' -> 'X' is exact.
+ */
 export function parsePayload(raw) {
   assert(typeof raw === 'string', 'PAYLOAD_MISSING');
-  const body = raw.startsWith(PAYLOAD_PREFIX) ? raw.slice(PAYLOAD_PREFIX.length) : raw;
+  let body = raw.trim();
+  if (body.startsWith(PAYLOAD_PREFIX)) body = body.slice(PAYLOAD_PREFIX.length);
+  body = body.replace(/\\([!-\/:-@\[-`{-~])/g, '$1');
   assert(body.startsWith('{'), 'PAYLOAD_MALFORMED', raw.slice(0, 40));
   return JSON.parse(body);
 }
+/** Text that goes into a stored event: no double quotes, backslashes or control characters. */
+export const safeText = (t) => String(t ?? '').replace(/["\\]/g, "'").replace(/[\u0000-\u001f\u007f]/g, ' ').trim();
 /** Parses exported Ledger rows (objects with 'Event ID' and 'Payload') back into events, verifying each one. */
 export function rowsToEvents(rows) {
   return rows.map(r => {

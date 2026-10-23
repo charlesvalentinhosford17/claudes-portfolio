@@ -219,6 +219,14 @@ test('Notion rows round-trip exactly; mirror orders are plain instructions for C
   assert.equal(rows.find(r => r['Event ID'] === 'FUND-active')['Cash change EUR'], 1000);
   assert.throws(() => rowsToEvents([{ 'Event ID': 'A', Payload: JSON.stringify({ id: 'B' }) }]), /PAYLOAD_ID_MISMATCH/);
   assert.ok(rows.every(r => r.Payload.startsWith('ev1:{')));                       // stored as text by the Notion connector
+  // Exactly what Notion's view export returned on 23 Oct 2026: markdown-escaped braces (and other punctuation).
+  const mdEscape = (t) => t.replace(/([\\{}\[\]_*~`$#|<>])/g, '\\$1');
+  assert.deepEqual(rowsToEvents(rows.map(r => ({ ...r, Payload: mdEscape(r.Payload) }))), all);
+  const real = 'ev1:\\{"id":"FUND-passive","type":"fund","book":"passive","at":"2026-10-23","amountCents":100000\\}';
+  assert.deepEqual(rowsToEvents([{ 'Event ID': 'FUND-passive', Payload: real }])[0].amountCents, 100000);
+  const tricky = decide(decideInput(all, { proposal: { ...decideInput(all).proposal, reason: 'Visa "beat" C:\\path $5_000 *now* [x] {y}' } })).event;
+  const back = rowsToEvents([eventToRow(tricky)].map(r => ({ ...r, Payload: mdEscape(r.Payload) })))[0];
+  assert.equal(back.reason, "Visa 'beat' C:'path $5_000 *now* [x] {y}");
   assert.deepEqual(rowsToEvents([{ 'Event ID': 'FUND-active', Payload: JSON.stringify(all[0]) }]), [all[0]]); // legacy, unprefixed
   const d = decide(decideInput(all)).event;
   const o = mirrorOrders([d], '2026-10-27');

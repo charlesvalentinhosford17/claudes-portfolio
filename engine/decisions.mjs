@@ -4,6 +4,7 @@ import { replay } from './ledger.mjs';
 import { checkBuy, checkSell, sizeBuy } from './limits.mjs';
 import { valueBook } from './valuation.mjs';
 import { assert, qtyToTicks, ticksToQty } from './util.mjs';
+import { safeText } from './notion.mjs';
 
 const CODE = { active: 'A', passive: 'P', noselection: 'N' };
 
@@ -33,7 +34,7 @@ export function decide(input) {
     id: prefix + n, type: 'decision', book: 'active', at: input.at, side: p.side, instrument: p.instrument,
     qty: ticksToQty(ticks), ...(p.side === 'BUY' ? { ceiling: p.ceiling } : {}), targetSession: ctx.targetSession,
     startType: p.startType || (p.side === 'SELL' ? 'exit' : 'parking'), ...(p.exception ? { exception: true } : {}),
-    ...(p.caseId ? { caseId: p.caseId } : {}), ...(p.caseUrl ? { caseUrl: p.caseUrl } : {}), reason: p.reason || ''
+    ...(p.caseId ? { caseId: p.caseId } : {}), ...(p.caseUrl ? { caseUrl: safeText(p.caseUrl) } : {}), reason: safeText(p.reason)
   };
   assert(event.reason.length >= 10, 'REASON_REQUIRED', 'every decision states its reason in plain words');
   return { ok: true, reasons: [], event, check };
