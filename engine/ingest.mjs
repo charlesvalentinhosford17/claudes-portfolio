@@ -47,5 +47,6 @@ export function dividendEvent(rawEvents, { book = 'active', instrumentKey, exDat
   return { id: `DIV-${book}-${pos.instrument.symbol}-${exDate}`, type: 'dividend', book, at: payDate, instrumentKey, symbol: pos.instrument.symbol, currency,
     exDate, grossPerShare, withholding, withholdingSource, fx: rate, qty: String(pos.ticks / 10000), cashEurCents: cash };
 }
-const parseLocal = (raw) => raw.map(e => (typeof e === 'string' ? JSON.parse(e) : e));
+import { parsePayload } from './notion.mjs';
+const parseLocal = (raw) => raw.map(e => (typeof e === 'string' ? parsePayload(e) : e));
 export { qtyToTicks };

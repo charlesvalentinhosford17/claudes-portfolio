@@ -18,7 +18,8 @@ export function eventToRow(e, decisionsById = {}) {
     expired: () => e.reason, skip: () => e.reason, dividend: () => e.note || 'Dividend', split: () => `Split ratio ${e.ratio}`,
     correction: () => `Reverses ${e.reverses}: ${e.reason}`, pause: () => e.reason || '15% downturn pause', restart: () => `Restart approved by ${e.approvedBy}`
   }[e.type]();
-  const payload = JSON.stringify(e);
+  // Prefixed so the Notion connector stores it as text (it rejects strings that look like JSON objects).
+  const payload = PAYLOAD_PREFIX + JSON.stringify(e);
   assert(payload.length <= 1990, 'PAYLOAD_TOO_LONG', e.id);
   return {
     'Event ID': e.id, Type: TYPE_LABEL[e.type], ...(e.book ? { Book: BOOK_LABEL[e.book] } : {}),
@@ -36,12 +37,20 @@ export function eventToRow(e, decisionsById = {}) {
   };
 }
 
+export const PAYLOAD_PREFIX = 'ev1:';
+/** Parses one Payload string (with or without the 'ev1:' prefix). */
+export function parsePayload(raw) {
+  assert(typeof raw === 'string', 'PAYLOAD_MISSING');
+  const body = raw.startsWith(PAYLOAD_PREFIX) ? raw.slice(PAYLOAD_PREFIX.length) : raw;
+  assert(body.startsWith('{'), 'PAYLOAD_MALFORMED', raw.slice(0, 40));
+  return JSON.parse(body);
+}
 /** Parses exported Ledger rows (objects with 'Event ID' and 'Payload') back into events, verifying each one. */
 export function rowsToEvents(rows) {
   return rows.map(r => {
     const id = r['Event ID'], raw = r.Payload;
-    assert(typeof raw === 'string' && raw.startsWith('{'), 'PAYLOAD_MISSING', String(id));
-    const e = JSON.parse(raw);
+    assert(typeof raw === 'string', 'PAYLOAD_MISSING', String(id));
+    const e = parsePayload(raw);
     assert(e.id === id, 'PAYLOAD_ID_MISMATCH', `${id} vs ${e.id}`);
     return e;
   });

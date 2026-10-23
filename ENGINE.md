@@ -25,7 +25,9 @@ only Charles can approve.
 | Watchlist | `collection://bde219e6-2cac-45f2-a824-ea222a4c0bc8` | `view://dee387a6-983b-4462-8d91-a1348345b92a` |
 | Activity | `collection://3b4de5e5-2ce0-430d-bb7d-c12db4d10aac` | `view://d0a8a353-cb9b-467e-8ee2-de09fb7acc8f` |
 
-`events` = the **Payload** strings of every Ledger row (read all pages of the view; strings are accepted as-is).
+`events` = the **Payload** strings of every Ledger row (read all pages of the view; pass the strings as-is). Payloads are
+stored as `ev1:` + JSON, because the Notion connector rejects text that looks like a JSON object; always create rows with
+exactly the properties the engine returns.
 `navHistory` = `[{ "date": "YYYY-MM-DD", "navCents": <Total NAV EUR × 100> }]` from Performance History.
 
 ## Commands

@@ -218,6 +218,8 @@ test('Notion rows round-trip exactly; mirror orders are plain instructions for C
   assert.deepEqual(rowsToEvents(rows), all);
   assert.equal(rows.find(r => r['Event ID'] === 'FUND-active')['Cash change EUR'], 1000);
   assert.throws(() => rowsToEvents([{ 'Event ID': 'A', Payload: JSON.stringify({ id: 'B' }) }]), /PAYLOAD_ID_MISMATCH/);
+  assert.ok(rows.every(r => r.Payload.startsWith('ev1:{')));                       // stored as text by the Notion connector
+  assert.deepEqual(rowsToEvents([{ 'Event ID': 'FUND-active', Payload: JSON.stringify(all[0]) }]), [all[0]]); // legacy, unprefixed
   const d = decide(decideInput(all)).event;
   const o = mirrorOrders([d], '2026-10-27');
   assert.match(o[0], /BUY 0\.4 V \(USD\) — limit 420/);

@@ -9,7 +9,7 @@ import { fillAmounts } from './costs.mjs';
 import { decide, size } from './decisions.mjs';
 import { bookPending, launchEvents } from './fills.mjs';
 import { pendingDecisions, replay } from './ledger.mjs';
-import { eventToRow, holdingRows, mirrorOrders, performanceRow } from './notion.mjs';
+import { eventToRow, holdingRows, mirrorOrders, parsePayload, performanceRow } from './notion.mjs';
 import { drawdown, valueBook } from './valuation.mjs';
 import { EngineError, qtyToTicks, ticksToQty } from './util.mjs';
 import { dividendEvent, ingest } from './ingest.mjs';
@@ -18,7 +18,7 @@ const decisionsById = (events) => Object.fromEntries(events.filter(e => e.type =
 const rows = (evs, all) => evs.map(e => eventToRow(e, decisionsById(all)));
 
 export function run(cmd, input) {
-  const events = (input.events || []).map(e => (typeof e === 'string' ? JSON.parse(e) : e));
+  const events = (input.events || []).map(e => (typeof e === 'string' ? parsePayload(e) : e));
   input = { ...input, events, asOf: input.asOf ?? input.today };
   switch (cmd) {
     case 'launch': {
