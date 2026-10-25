@@ -7,4 +7,4 @@
 
 - `example.json` shows every field the template expects (shape only).
 - `test_daily_report.py` renders the example and checks it fits on one page with built-in Helvetica.
-  It needs `reportlab` and `pypdf` and is deliberately not part of `npm test`.
+  It needs `reportlab` and `pypdf` and is deliberately not part of `npm test`; CI runs it as a separate job.
