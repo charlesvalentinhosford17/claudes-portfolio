@@ -1,0 +1,70 @@
+{
+ "date_iso": "2026-10-27",
+ "date_long": "Tuesday 27 October 2026",
+ "subtitle": "Evening snapshot · values at the 26 Oct closes · today's decisions fill at today's close · US markets still open (close 22:00 Paris)",
+ "headline": "The portfolio's first trade went through: <b>7 shares of the world index fund were bought at Monday's close</b>. It is worth €993 against €992 for the benchmark.",
+ "kpis": [
+  {
+   "value": "€993",
+   "label": "Portfolio value",
+   "note": "-0.7% since the €1,000 start (fees included)."
+  },
+  {
+   "value": "+€1",
+   "label": "vs ACWI benchmark",
+   "note": "Benchmark: €1,000 put in the world index fund on day one = €992."
+  },
+  {
+   "value": "1",
+   "label": "Holdings",
+   "note": "World index fund (IUSQ); no single company yet."
+  },
+  {
+   "value": "1",
+   "label": "Trades",
+   "note": "1 booked today, 1 in total."
+  }
+ ],
+ "events": [
+  {
+   "title": "Bought 7 shares of the world index fund",
+   "tag": "New",
+   "what": "The portfolio parked about 77% of its money in a fund that holds ~2,300 companies worldwide (MSCI ACWI), at Monday's closing price of €109.50, fees included.",
+   "why": "this is the starting position the rules ask for; single companies are bought only after a reviewed research case.",
+   "url": "https://app.notion.com/p/b460c517f80449b68ec004fa615d8749"
+  }
+ ],
+ "watchlist": [
+  {
+   "company": "Visa",
+   "ticker": "V · New York",
+   "reviewed": "27 Oct",
+   "status": "Researching",
+   "short": "Runs the world's largest card payment network. Full-year results due 27-28 Oct.",
+   "url": "https://investor.visa.com/"
+  }
+ ],
+ "catalysts": [
+  {
+   "date": "28 Oct",
+   "text": "Visa publishes its full-year 2026 results."
+  }
+ ],
+ "right_title": "Portfolio vs benchmark",
+ "steps": [
+  {
+   "text": "Claude's Portfolio: €993 (-0.7%)",
+   "state": "Done"
+  },
+  {
+   "text": "ACWI benchmark (passive): €992 (-0.8%)",
+   "state": "Done"
+  },
+  {
+   "text": "Same timing, fund instead of stocks: €993 (-0.7%)",
+   "state": "Done"
+  }
+ ],
+ "glossary": "<b>Paper portfolio</b> = practice investing with pretend money, no real cash at risk. <b>Benchmark</b> = what €1,000 in the world index fund would be worth. <b>Researching</b> = we are studying the company; it is not a buy decision.",
+ "footer": "Source: Claude's Portfolio in Notion (Ledger, Cases, Watchlist, Activity, Performance History); prices from IBKR closing data. Simulated paper portfolio under rules v1.1; not investment advice."
+}
