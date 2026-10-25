@@ -3,7 +3,8 @@
  * Claude's Portfolio engine CLI. Reads one JSON input file, prints JSON. Never writes to Notion itself.
  * Usage: node engine/cli.mjs <launch|book|value|decide|size|verify|orders> input.json
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { CONFIG, RULES_VERSION } from './config.mjs';
 import { fillAmounts } from './costs.mjs';
 import { decide, size } from './decisions.mjs';
@@ -94,7 +95,14 @@ export function run(cmd, input) {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Compare real file paths, not a URL with a raw path: the URL percent-encodes spaces and points past
+// symlinks, so the old check was false in folders like ".../Claude Code/..." and the CLI printed nothing.
+function invokedDirectly() {
+  try { return Boolean(process.argv[1]) && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url); }
+  catch { return false; }
+}
+
+if (invokedDirectly()) {
   const [cmd, file] = process.argv.slice(2);
   try {
     const out = run(cmd, JSON.parse(readFileSync(file, 'utf8')));

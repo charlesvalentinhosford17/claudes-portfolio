@@ -76,5 +76,5 @@ Sale: `{ "side": "SELL", "instrument": <same instrument>, "qty": "0.4", "reason"
 8. Backup: save the `events` JSON to Google Drive (Claude's Portfolio Reports folder).
 
 ## Tests
-`npm test` runs the engine tests (fees, sessions, ledger integrity, limits, fills, mirrors, drawdown, Notion round trip),
+`npm test` runs the engine tests (fees, sessions, ledger integrity, limits, fills, mirrors, drawdown, Notion round trip, CLI),
 the ingest tests and the original viewer and preflight tests.
